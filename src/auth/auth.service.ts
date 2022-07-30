@@ -4,9 +4,15 @@ import { AuthDto } from './dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { User } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private config: ConfigService,
+    private jwt: JwtService,
+  ) {}
 
   async singUp(dto: AuthDto): Promise<User> {
     try {
@@ -47,9 +53,24 @@ export class AuthService {
         throw new ForbiddenException('INVALID_CREDENTIALS');
       }
       delete user.password;
-      return user;
+      const accessToken = await this.createToken({
+        userId: user.id,
+        email: user.email,
+      });
+      return {
+        user,
+        accessToken,
+      };
     } catch (e) {
       throw e;
     }
+  }
+
+  createToken(payload: { userId: number; email: string }) {
+    const secret = this.config.get('JWT_SECRET');
+    return this.jwt.signAsync(payload, {
+      expiresIn: '15m',
+      secret,
+    });
   }
 }
