@@ -32,6 +32,12 @@
 $ npm install
 ```
 
+## Migrations
+
+
+```bash
+$ npx prisma  
+```
 ## Running the app
 
 ```bash
