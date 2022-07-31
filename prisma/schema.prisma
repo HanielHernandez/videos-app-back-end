@@ -19,6 +19,20 @@ model User {
   videos    Video[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  subscribers Subscription[] @relation("subscribers")
+  publishers  Subscription[] @relation("publishers")
+}
+
+model Subscription {
+  subscriberId Int
+  subscriber   User     @relation("subscribers", fields: [subscriberId], references: [id])
+  publisherId  Int
+  publisher    User     @relation("publishers", fields: [publisherId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@id([subscriberId, publisherId])
 }
 
 model Video {
