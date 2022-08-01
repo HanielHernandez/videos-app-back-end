@@ -1,17 +1,21 @@
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
 
-const generateVideo = (userId: any) => {
+export const generateVideo = (userId: number | string) => {
   return {
-    publishedBy: userId,
+    publishedById: userId,
     published: true,
+    miniature: faker.image.imageUrl(160, 250),
     description: faker.lorem.paragraph(1),
-    title: faker.commerce.productName(),
+    title: faker.random.words(6),
     url: faker.internet.url(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 };
 
-export const createUsers = async (prisma: PrismaClient) => {
+export const createVideos = async (prisma: PrismaClient) => {
+  console.log('***** Creating videos *****');
   const users = await prisma.user.findMany();
 
   await Promise.all(
@@ -23,4 +27,5 @@ export const createUsers = async (prisma: PrismaClient) => {
       return prisma.video.createMany({ data: videos });
     }),
   );
+  console.log('***** Videos created *****');
 };

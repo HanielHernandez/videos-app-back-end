@@ -1,11 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import * as argon from 'argon2';
+const generateUser = async () => {
+  const password = await argon.hash('123456');
 
-const generateUser = () => {
   return {
     name: faker.name.findName(),
     email: faker.internet.email(),
-    password: '123456',
+    password,
     photoURL: faker.image.avatar(),
   };
 };
@@ -13,7 +15,8 @@ const generateUser = () => {
 export const createUsers = async (prisma: PrismaClient) => {
   const users = [];
   for (let i = 0; i < 15; i++) {
-    users.push(generateUser());
+    const user = await generateUser();
+    users.push(user);
   }
   await prisma.user.createMany({
     data: users,

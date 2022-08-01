@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '@prisma/client';
+import { get } from 'http';
 import { GetUser } from 'src/decorators/';
-import { VideosIndexDTO } from './dto/videos.index.dto';
+import { PaginationParams } from 'src/shared/interfaces';
+import { UserDecodedData } from 'src/shared/interfaces/Iuser.decoded.data';
 import { VideosService } from './videos.service';
 @Controller('videos')
 export class VideosController {
@@ -10,7 +11,17 @@ export class VideosController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  index(@Body() body: VideosIndexDTO, @GetUser() user: User) {
-    return this.videos.index(user.id, body);
+  index(
+    @Query() queryParams: PaginationParams,
+    @GetUser() user: UserDecodedData,
+  ) {
+    console.log(user);
+    return this.videos.index(user.id, queryParams);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  show(@Param() id: string | number) {
+    return this.videos.findById(typeof id == 'string' ? Number(id) : id);
   }
 }
