@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Video } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationParams, PaginationResponse } from 'src/shared/interfaces';
+import { CreateVideoDTO } from './dto/create-video.dto';
+import { UpdateVideoDTO } from './dto/update-video.dto';
 import { VideosIndexDTO } from './dto/videos.index.dto';
 
 @Injectable()
@@ -68,9 +70,31 @@ export class VideosService {
   }
 
   async findById(id: number) {
-    return await this.prisma.video.findFirst({
+    return this.prisma.video.findFirst({
       where: {
         id: id,
+      },
+    });
+  }
+
+  async update(id: number, data: UpdateVideoDTO) {
+    return this.prisma.video.update({
+      where: {
+        id: id,
+      },
+      data,
+    });
+  }
+
+  async create(data: CreateVideoDTO) {
+    return this.prisma.video.create({
+      data,
+    });
+  }
+  async delete(id: number) {
+    return this.prisma.video.delete({
+      where: {
+        id,
       },
     });
   }
