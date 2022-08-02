@@ -32,13 +32,18 @@
 $ npm install
 ```
 
-## Migrate
+## Migrate and generate models
 
 
-```bash
-$ npx prisma migrate dev
+```node
+npx prisma migrate dev
+
+```
+```node
+npx prisma generate 
 ```
 ## Seed
+
 
 ```bash
 $ npm run db:seed
