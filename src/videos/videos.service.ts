@@ -111,4 +111,15 @@ export class VideosService {
       },
     });
   }
+
+  publish(id: number) {
+    return this.prisma.video.update({
+      where: {
+        id,
+      },
+      data: {
+        published: true,
+      },
+    });
+  }
 }

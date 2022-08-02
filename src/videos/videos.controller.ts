@@ -10,14 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { get } from 'http';
 import { GetUser } from 'src/decorators/';
-import { PaginationParams } from 'src/shared/interfaces';
 import { UserDecodedData } from 'src/shared/interfaces/Iuser.decoded.data';
 import { CreateVideoDTO } from './dto/create-video.dto';
 import { UpdateVideoDTO } from './dto/update-video.dto';
 import { VideosIndexDTO } from './dto/videos.index.dto';
-import { BelongsToUserGuard } from './guards/belongs-to-user.guard';
 import { VideosService } from './videos.service';
 @Controller('videos')
 export class VideosController {
@@ -54,5 +51,11 @@ export class VideosController {
   @Delete('/:id')
   delete(@Param('id') id: string) {
     return this.videos.delete(Number.parseInt(id));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/publish')
+  publish(@Param('id') id: string) {
+    return this.videos.publish(Number.parseInt(id));
   }
 }
