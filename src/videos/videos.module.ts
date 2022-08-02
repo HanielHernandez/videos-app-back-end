@@ -5,12 +5,6 @@ import { VideosService } from './videos.service';
 
 @Module({
   controllers: [VideosController],
-  providers: [
-    VideosService,
-    {
-      provide: 'APP_GUARD',
-      useClass: BelongsToUserGuard,
-    },
-  ],
+  providers: [VideosService],
 })
 export class VideosModule {}

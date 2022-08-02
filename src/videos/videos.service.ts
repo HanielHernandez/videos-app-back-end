@@ -12,31 +12,41 @@ export class VideosService {
 
   async index(
     userId: number,
-    params: PaginationParams,
+    params: VideosIndexDTO,
   ): Promise<PaginationResponse<Video>> {
-    console.log('userID', userId);
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
       include: {
-        subscribers: true,
+        subscriberOf: true,
       },
     });
-    const publishersId = user.subscribers.map(
-      (publishers) => publishers.publisherId,
+
+    const publishersId = user.subscriberOf.map(
+      (subscriberTo) => subscriberTo.publisherId,
     );
 
     console.log('Publishers of user ' + userId, publishersId);
     const where = {
       publishedById: {
-        in: publishersId,
+        ...(params.userId
+          ? {
+              equals:
+                typeof params.userId == 'string'
+                  ? Number(params.userId)
+                  : params.userId,
+            }
+          : { in: publishersId }),
       },
-      AND: {
-        published: true,
-      },
+      ...(params.userId != userId && {
+        AND: {
+          published: true,
+        },
+      }),
     };
     const totalItems = await this.prisma.video.count({ where });
+
     const items = await this.prisma.video.findMany({
       where,
       ...this.getFiltersFromParams(params),
@@ -70,9 +80,12 @@ export class VideosService {
   }
 
   async findById(id: number) {
-    return this.prisma.video.findFirst({
+    return this.prisma.video.findUnique({
       where: {
-        id: id,
+        id,
+      },
+      include: {
+        publishedBy: true,
       },
     });
   }

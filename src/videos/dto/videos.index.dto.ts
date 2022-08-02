@@ -1,6 +1,5 @@
-export interface VideosIndexDTO {
-  page?: number;
-  perPage?: number;
-  filters?: any;
-  orderBy?: any;
+import { PaginationParams } from 'src/shared/interfaces';
+
+export interface VideosIndexDTO extends PaginationParams {
+  userId: number | string;
 }
