@@ -23,11 +23,6 @@ export class VideosService {
       },
     });
 
-    const publishersId = user.subscriberOf.map(
-      (subscriberTo) => subscriberTo.publisherId,
-    );
-
-    console.log('Publishers of user ' + userId, publishersId);
     const where = {
       publishedById: {
         ...(params.userId
@@ -37,7 +32,15 @@ export class VideosService {
                   ? Number(params.userId)
                   : params.userId,
             }
-          : { in: publishersId }),
+          : {
+              ...(params.forUser
+                ? {
+                    in: user.subscriberOf.map(
+                      (subscriberTo) => subscriberTo.publisherId,
+                    ),
+                  }
+                : {}),
+            }),
       },
       ...(params.userId != userId && {
         AND: {
@@ -45,6 +48,8 @@ export class VideosService {
         },
       }),
     };
+
+    console.log('GENERATED WHERE', where);
     const totalItems = await this.prisma.video.count({ where });
 
     const items = await this.prisma.video.findMany({
