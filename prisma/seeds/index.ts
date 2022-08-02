@@ -6,11 +6,11 @@ import { createVideos } from './videos.factory';
 const prisma = new PrismaClient();
 
 const main = async () => {
-  // try {
-  //   await createUsers(prisma);
-  // } catch (e) {
-  //   console.error(e);
-  // }
+  try {
+    await createUsers(prisma);
+  } catch (e) {
+    console.error(e);
+  }
 
   try {
     await createVideos(prisma);
@@ -18,11 +18,11 @@ const main = async () => {
     console.error(e);
   }
 
-  // try {
-  //   await createSubscriptions(prisma);
-  // } catch (e) {
-  //   console.error(e);
-  // }
+  try {
+    await createSubscriptions(prisma);
+  } catch (e) {
+    console.error(e);
+  }
 
   console.log('***** DATABASE SEEDEED SUCCESSFULLY ******');
 };
