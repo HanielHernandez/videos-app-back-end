@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Video } from '@prisma/client';
+import { LikedVideos, Video } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationParams, PaginationResponse } from 'src/shared/interfaces';
+import { CreateLikeDTO } from './dto/create-like.dto';
 import { CreateVideoDTO } from './dto/create-video.dto';
 import { UpdateVideoDTO } from './dto/update-video.dto';
 import { VideosIndexDTO } from './dto/videos.index.dto';
@@ -84,15 +85,32 @@ export class VideosService {
     };
   }
 
-  async findById(id: number) {
-    return this.prisma.video.findUnique({
+  async findById(id: number, userId?: number) {
+    const video = await this.prisma.video.findUnique({
       where: {
         id,
       },
       include: {
         publishedBy: true,
+        likes: {
+          select: {
+            likeById: true,
+          },
+        },
       },
     });
+    let subscribed = null;
+    if (userId) {
+      subscribed = await this.prisma.subscription.findUnique({
+        where: {
+          subscriberId_publisherId: {
+            subscriberId: userId,
+            publisherId: video.publishedById,
+          },
+        },
+      });
+    }
+    return { ...video, subscribed };
   }
 
   async update(id: number, data: UpdateVideoDTO) {
@@ -109,6 +127,7 @@ export class VideosService {
       data,
     });
   }
+
   async delete(id: number) {
     return this.prisma.video.delete({
       where: {
@@ -126,5 +145,23 @@ export class VideosService {
         published: true,
       },
     });
+  }
+
+  async likeVideo(data: CreateLikeDTO) {
+    const video = await this.findById(data.videoId);
+    const exist = video.likes.findIndex(
+      (like) => like.likeById == data.likeById,
+    );
+    if (exist > -1) {
+      return this.prisma.likedVideos.delete({
+        where: {
+          likeById_videoId: data,
+        },
+      });
+    } else {
+      return this.prisma.likedVideos.create({
+        data,
+      });
+    }
   }
 }

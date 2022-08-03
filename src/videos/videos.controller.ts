@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from '@prisma/client';
 import { GetUser } from 'src/decorators/';
 import { UserDecodedData } from 'src/shared/interfaces/Iuser.decoded.data';
 import { CreateVideoDTO } from './dto/create-video.dto';
@@ -31,8 +32,8 @@ export class VideosController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/:id')
-  findOne(@Param() { id }: any) {
-    return this.videos.findById(typeof id == 'string' ? Number(id) : id);
+  findOne(@Param() { id }: any, @GetUser() user: User) {
+    return this.videos.findById(+id, +user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -57,5 +58,14 @@ export class VideosController {
   @Post(':id/publish')
   publish(@Param('id') id: string) {
     return this.videos.publish(Number.parseInt(id));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/like')
+  like(@GetUser() user: UserDecodedData, @Param('id') id: string) {
+    return this.videos.likeVideo({
+      likeById: +user.id,
+      videoId: +id,
+    });
   }
 }
