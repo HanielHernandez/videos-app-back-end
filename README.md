@@ -37,13 +37,12 @@ $ npm install
 
 ```node
 npx prisma migrate dev
-
 ```
+
 ```node
 npx prisma generate 
 ```
-## Seed
-
+## Seeding
 
 ```bash
 $ npm run db:seed

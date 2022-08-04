@@ -23,6 +23,7 @@ export class VideosService {
         subscriberOf: true,
       },
     });
+    console.log('where', params.search);
 
     const where = {
       publishedById: {
@@ -43,14 +44,27 @@ export class VideosService {
                 : {}),
             }),
       },
-      ...(params.userId != userId && {
-        AND: {
-          published: true,
-        },
-      }),
+      AND: [
+        ...(params.search
+          ? [
+              {
+                title: {
+                  contains: params.search,
+                },
+              },
+            ]
+          : []),
+        ...(params.userId != userId
+          ? [
+              {
+                published: true,
+              },
+            ]
+          : []),
+      ],
     };
 
-    console.log('GENERATED WHERE', where);
+    console.log('where', where);
     const totalItems = await this.prisma.video.count({ where });
 
     const items = await this.prisma.video.findMany({
@@ -99,6 +113,12 @@ export class VideosService {
         },
       },
     });
+    const follows = await this.prisma.subscription.count({
+      where: {
+        publisherId: video.publishedById,
+      },
+    });
+
     let subscribed = null;
     if (userId) {
       subscribed = await this.prisma.subscription.findUnique({
@@ -110,7 +130,16 @@ export class VideosService {
         },
       });
     }
-    return { ...video, subscribed };
+    return {
+      ...{
+        ...video,
+        publishedBy: {
+          ...video.publishedBy,
+          followers: follows,
+        },
+      },
+      subscribed,
+    };
   }
 
   async update(id: number, data: UpdateVideoDTO) {
@@ -136,13 +165,19 @@ export class VideosService {
     });
   }
 
-  publish(id: number) {
+  async publish(id: number) {
+    const video = await this.prisma.video.findUnique({
+      where: {
+        id,
+      },
+    });
+
     return this.prisma.video.update({
       where: {
         id,
       },
       data: {
-        published: true,
+        published: !video.published,
       },
     });
   }
