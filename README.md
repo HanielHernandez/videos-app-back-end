@@ -45,8 +45,10 @@ npx prisma generate
 ## Seeding
 
 ```bash
-$ npm run db:seed
+npm run db:seed
 ```
+
+**note:** this command will cerate several user account, you can access with the password **123456**
 
 ## Running the app
 
