@@ -48,7 +48,7 @@ npx prisma generate
 npm run db:seed
 ```
 
-**note:** this command will cerate several user account, you can access with the password **123456**
+**note:** this command will create several user account, you can use then to test the app by accessing with the password: **123456**
 
 ## Running the app
 
